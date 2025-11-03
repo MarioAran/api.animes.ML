@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión | RecoAnimesFLV</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="overlay"></div>
+  <div class="formulario">
+    <h1>Bienvenido a <span>RecoAnimesFLV</span></h1>
+    <p class="subtitulo">Inicia sesión para descubrir tus animes recomendados</p>
+
+    <form id="loginForm">
+      <div class="username">
+        <input type="text" id="username" required>
+        <label>Usuario</label>
+        <span></span>
+      </div>
+
+      <div class="username">
+        <input type="password" id="password" required>
+        <label>Contraseña</label>
+        <span></span>
+      </div>
+
+      <input type="submit" value="Entrar al multiverso anime">
+    </form>
+  </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            const response = await fetch("http://127.0.0.1:5000/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            console.log("Respuesta del backend:", data);
+
+            if (response.ok && data.status === "success") {
+              localStorage.setItem("userLogged", username);
+              alert("✨ Bienvenido, " + username + " ✨");
+              window.location.href = "./app.html";
+            } else {
+              alert("❌ " + (data.message || "Usuario o contraseña incorrectos"));
+            }
+          } catch (error) {
+            alert("⚠️ Error de conexión con el servidor");
+            console.error(error);
+          }
+        });
+  </script>
+</body>
+</html>
+
+
+

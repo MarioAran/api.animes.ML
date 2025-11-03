@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RecoAnimesFLV | Recomendador de Animes</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: url("https://i.imgur.com/pZXfzbJ.png") no-repeat center center/cover;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === HEADER === */
+    .header {
+      background: rgba(20, 20, 40, 0.75);
+      backdrop-filter: blur(10px);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(157, 92, 255, 0.3);
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      color: #d7b9ff;
+      text-shadow: 0 0 12px rgba(157, 92, 255, 0.8);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #userDisplay {
+      font-size: 1rem;
+      color: #e0d3ff;
+      text-shadow: 0 0 8px rgba(173, 122, 255, 0.6);
+    }
+
+    /* === BOTÓN LOGOUT === */
+    #logoutBtn {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, #6a00f4, #9d5cff, #00c3ff);
+      border: none;
+      padding: 10px 22px;
+      color: #fff;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(157, 92, 255, 0.6);
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+
+    #logoutBtn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: 0.5s;
+    }
+
+    #logoutBtn:hover::before { left: 100%; }
+
+    #logoutBtn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(157, 92, 255, 0.8), 0 0 40px rgba(0,195,255,0.5);
+      text-shadow: 0 0 12px rgba(255,255,255,0.6);
+    }
+
+    /* === SECCIÓN PRINCIPAL === */
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: rgba(15, 15, 35, 0.8);
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(157, 92, 255, 0.3);
+      padding: 30px;
+      backdrop-filter: blur(8px);
+    }
+
+    .container h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #e0d3ff;
+      text-shadow: 0 0 10px rgba(157, 92, 255, 0.6);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #c8b8ff;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid rgba(157, 92, 255, 0.3);
+      background: rgba(40, 20, 70, 0.6);
+      color: white;
+      font-size: 1rem;
+      width: 200px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #9d5cff;
+      box-shadow: 0 0 8px rgba(157, 92, 255, 0.6);
+    }
+
+    button {
+      margin-top: 10px;
+      background: linear-gradient(90deg, #7b2ff7, #9d5cff);
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 10px rgba(157, 92, 255, 0.6);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(157, 92, 255, 0.8);
+    }
+
+    /* === RESULTADOS === */
+    .results {
+      margin-top: 30px;
+      background: rgba(20, 20, 50, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .anime-card {
+      background: rgba(40, 20, 80, 0.7);
+      border: 1px solid rgba(157, 92, 255, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      transition: 0.3s;
+    }
+
+    .anime-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 10px rgba(157, 92, 255, 0.4);
+    }
+
+    /* === PANEL DE CONTROL AL PIE === */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-top: auto;
+      padding: 25px 40px;
+      background: rgba(10, 10, 30, 0.8);
+      border-top: 2px solid rgba(157, 92, 255, 0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    .control-panel, .status-panel {
+      flex: 1;
+      background: rgba(25, 20, 60, 0.6);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 12px rgba(157, 92, 255, 0.2);
+    }
+
+    .control-panel h3, .status-panel h3 {
+      margin-bottom: 15px;
+      text-align: center;
+      color: #d9caff;
+      text-shadow: 0 0 10px rgba(157, 92, 255, 0.6);
+    }
+
+    .control-panel button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .status-message {
+      background: rgba(40, 20, 80, 0.6);
+      border: 1px solid rgba(157, 92, 255, 0.3);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: #d6c8ff;
+      min-height: 120px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>RecoAnimesFLV</h1>
+    <div class="user-info">
+      <p id="userDisplay"></p>
+      <button id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2>Obtén tus recomendaciones</h2>
+    <div style="text-align:center;">
+      <label for="userId">ID de Usuario:</label>
+      <input type="number" id="userId" placeholder="Ej: 1, 2, 3..." min="1">
+      <button onclick="getRecommendations()">Buscar</button>
+    </div>
+
+    <div class="results" id="resultsContainer">
+      <h3>Recomendaciones encontradas</h3>
+      <div id="recommendationsList"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="control-panel">
+      <h3>Panel de Control</h3>
+      <button onclick="initializeAPI()">Inicializar API</button>
+      <button onclick="trainModel()">Entrenar Modelo</button>
+      <button onclick="checkHealth()">Verificar Estado</button>
+      <button onclick="getVersion()">Obtener Versión</button>
+    </div>
+
+    <div class="status-panel">
+      <h3>Estado del Sistema</h3>
+      <div id="statusMessages" class="status-message">Aún no hay mensajes...</div>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE_URL = 'http://127.0.0.1:5000';
+
+    // Sesión
+    const user = localStorage.getItem("userLogged");
+    if (!user) window.location.href = "logginweb.html";
+    else document.getElementById("userDisplay").innerText = `Bienvenido, ${user}`;
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("userLogged");
+      window.location.href = "logginweb.html";
+    });
+
+    // Recomendaciones
+    async function getRecommendations() {
+      const userId = document.getElementById('userId').value.trim();
+      const resultsDiv = document.getElementById('resultsContainer');
+      const listDiv = document.getElementById('recommendationsList');
+
+      if (!userId) return alert("Por favor ingresa un ID de usuario.");
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/recommend/${userId}`);
+        const data = await response.json();
+
+        if (response.ok && data.recommendations) {
+          listDiv.innerHTML = "";
+          data.recommendations.forEach(anime => {
+            const card = document.createElement('div');
+            card.classList.add('anime-card');
+            card.innerHTML = `
+              <h4>${anime.title}</h4>
+              <p><strong>Género:</strong> ${anime.genre}</p>
+              <p><strong>Tipo:</strong> ${anime.type}</p>
+            `;
+            listDiv.appendChild(card);
+          });
+          resultsDiv.style.display = "block";
+        } else {
+          alert("No se encontraron recomendaciones.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error al obtener las recomendaciones.");
+      }
+    }
+
+    // Panel de control
+    async function initializeAPI() {
+      showStatus("Inicializando API...");
+      const res = await fetch(`${API_BASE_URL}/`);
+      showStatus(res.ok ? "API inicializada correctamente" : "Error al inicializar API");
+    }
+
+    async function trainModel() {
+      showStatus("Entrenando modelo...");
+      const res = await fetch(`${API_BASE_URL}/train`);
+      showStatus(res.ok ? "Modelo entrenado correctamente" : "Error entrenando modelo");
+    }
+
+    async function checkHealth() {
+      const res = await fetch(`${API_BASE_URL}/health`);
+      const data = await res.json();
+      showStatus(res.ok ? `Estado: ${data.status}` : "Error al verificar estado");
+    }
+
+    async function getVersion() {
+      const res = await fetch(`${API_BASE_URL}/version`);
+      const data = await res.json();
+      showStatus(res.ok ? `Versión actual: ${data.model_version}` : "Error al obtener versión");
+    }
+
+    function showStatus(msg) {
+      document.getElementById("statusMessages").innerText = msg;
+    }
+  </script>
+</body>
+</html>
+
+
+
+
