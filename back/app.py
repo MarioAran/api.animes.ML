@@ -110,8 +110,6 @@ def login():
         password = data.get('password')
         if not username or not password:
             return jsonify({"status": "error", "message": "Usuario y contraseña requeridos"}), 400
-        if not os.path.exists(users_path):
-            return jsonify({"status": "error", "message": "Archivo de usuarios no encontrado"}), 500
         result = model.login(username, password)
         if result == "Logged":
             return jsonify({
@@ -125,6 +123,7 @@ def login():
                 "message": "Usuario o contraseña incorrectos"
             }), 401
     except Exception as e:
+        print({str(e)})
         return jsonify({"status": "error", "message": f"Error en el servidor: {str(e)}"}), 500
     
 @app.route('/recommend/<int:user_id>', methods=['GET'])
