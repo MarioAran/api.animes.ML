@@ -212,6 +212,40 @@
       color: #d6c8ff;
       min-height: 120px;
     }
+    /* --- ESTILO DE LAS TARJETAS HORIZONTALES --- */
+    #recommendationsList {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+      margin-top: 25px;
+    }
+
+    .anime-card {
+      background: rgba(50, 10, 90, 0.5);
+      border: 1px solid rgba(180, 120, 255, 0.3);
+      border-radius: 14px;
+      padding: 15px;
+      width: 180px;
+      color: #e5d7ff;
+      box-shadow: 0 0 15px rgba(157, 92, 255, 0.2);
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+
+    .anime-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 25px rgba(200, 150, 255, 0.4);
+    }
+
+    .anime-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .anime-card h4 {
+      margin-bottom: 10px;
+      color: #cfa9ff;
+    }
   </style>
 </head>
 <body>
@@ -253,81 +287,96 @@
   </footer>
 
   <script>
-    const API_BASE_URL = 'http://127.0.0.1:5000';
+  const API_BASE_URL = 'http://127.0.0.1:5000';
 
-    // Sesión
-    const user = localStorage.getItem("userLogged");
-    if (!user) window.location.href = "logginweb.html";
-    else document.getElementById("userDisplay").innerText = `Bienvenido, ${user}`;
+  // Sesión
+  const user = localStorage.getItem("userLogged");
+  if (!user) window.location.href = "logginweb.html";
+  else document.getElementById("userDisplay").innerText = `Bienvenido, ${user}`;
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("userLogged");
-      window.location.href = "logginweb.html";
-    });
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("userLogged");
+    window.location.href = "logginweb.html";
+  });
 
-    // Recomendaciones
-    async function getRecommendations() {
-      const userId = document.getElementById('userId').value.trim();
-      const resultsDiv = document.getElementById('resultsContainer');
-      const listDiv = document.getElementById('recommendationsList');
+  // Recomendaciones con imágenes
+  async function getRecommendations() {
+    const userId = document.getElementById('userId').value.trim();
+    const resultsDiv = document.getElementById('resultsContainer');
+    const listDiv = document.getElementById('recommendationsList');
 
-      if (!userId) return alert("Por favor ingresa un ID de usuario.");
+    if (!userId) return alert("Por favor ingresa un ID de usuario.");
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/recommend/${userId}`);
-        const data = await response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/recommend/${userId}`);
+      const data = await response.json();
 
-        if (response.ok && data.recommendations) {
-          listDiv.innerHTML = "";
-          data.recommendations.forEach(anime => {
-            const card = document.createElement('div');
-            card.classList.add('anime-card');
-            card.innerHTML = `
-              <h4>${anime.title}</h4>
-              <p><strong>Género:</strong> ${anime.genre}</p>
-              <p><strong>Tipo:</strong> ${anime.type}</p>
-            `;
-            listDiv.appendChild(card);
-          });
-          resultsDiv.style.display = "block";
-        } else {
-          alert("No se encontraron recomendaciones.");
+      if (response.ok && data.recommendations) {
+        listDiv.innerHTML = "";
+
+        for (const anime of data.recommendations) {
+          // Llamar a la API de Jikan para obtener la portada
+          let imageUrl = "https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png";
+          try {
+            const jikanRes = await fetch(`https://api.jikan.moe/v4/anime/${anime.anime_id}`);
+            const jikanData = await jikanRes.json();
+            imageUrl = jikanData.data?.images?.jpg?.large_image_url || imageUrl;
+          } catch (err) {
+            console.warn("No se pudo obtener imagen para", anime.title);
+          }
+
+          const card = document.createElement('div');
+          card.classList.add('anime-card');
+          card.style.textAlign = "center";
+          card.innerHTML = `
+            <h4 style="margin-bottom:10px; color:#d7b9ff;">${anime.title}</h4>
+            <img src="${imageUrl}" alt="${anime.title}" style="width:150px; border-radius:10px; margin-bottom:10px; box-shadow:0 0 12px rgba(157,92,255,0.5)">
+            <p><strong>Género:</strong> ${anime.genre}</p>
+            <p><strong>Tipo:</strong> ${anime.type}</p>
+          `;
+          listDiv.appendChild(card);
         }
-      } catch (err) {
-        console.error(err);
-        alert("Error al obtener las recomendaciones.");
+
+        resultsDiv.style.display = "block";
+      } else {
+        alert("No se encontraron recomendaciones.");
       }
+    } catch (err) {
+      console.error(err);
+      alert("Error al obtener las recomendaciones.");
     }
+  }
 
-    // Panel de control
-    async function initializeAPI() {
-      showStatus("Inicializando API...");
-      const res = await fetch(`${API_BASE_URL}/`);
-      showStatus(res.ok ? "API inicializada correctamente" : "Error al inicializar API");
-    }
+  // Panel de control
+  async function initializeAPI() {
+    showStatus("Inicializando API...");
+    const res = await fetch(`${API_BASE_URL}/`);
+    showStatus(res.ok ? "API inicializada correctamente" : "Error al inicializar API");
+  }
 
-    async function trainModel() {
-      showStatus("Entrenando modelo...");
-      const res = await fetch(`${API_BASE_URL}/train`);
-      showStatus(res.ok ? "Modelo entrenado correctamente" : "Error entrenando modelo");
-    }
+  async function trainModel() {
+    showStatus("Entrenando modelo...");
+    const res = await fetch(`${API_BASE_URL}/train`);
+    showStatus(res.ok ? "Modelo entrenado correctamente" : "Error entrenando modelo");
+  }
 
-    async function checkHealth() {
-      const res = await fetch(`${API_BASE_URL}/health`);
-      const data = await res.json();
-      showStatus(res.ok ? `Estado: ${data.status}` : "Error al verificar estado");
-    }
+  async function checkHealth() {
+    const res = await fetch(`${API_BASE_URL}/health`);
+    const data = await res.json();
+    showStatus(res.ok ? `Estado: ${data.status}` : "Error al verificar estado");
+  }
 
-    async function getVersion() {
-      const res = await fetch(`${API_BASE_URL}/version`);
-      const data = await res.json();
-      showStatus(res.ok ? `Versión actual: ${data.model_version}` : "Error al obtener versión");
-    }
+  async function getVersion() {
+    const res = await fetch(`${API_BASE_URL}/version`);
+    const data = await res.json();
+    showStatus(res.ok ? `Versión actual: ${data.model_version}` : "Error al obtener versión");
+  }
 
-    function showStatus(msg) {
-      document.getElementById("statusMessages").innerText = msg;
-    }
-  </script>
+  function showStatus(msg) {
+    document.getElementById("statusMessages").innerText = msg;
+  }
+</script>
+
 </body>
 </html>
 
