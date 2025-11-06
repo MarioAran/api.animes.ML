@@ -47,7 +47,7 @@ Sistema de recomendación de animes basado en valoraciones de los usuarios, desa
 ## Iniciar la pagina de Loggin
 
 1. Entra en la pagina`http://localhost:5500/logginweb.html` en tu navegador (usa doble clic o “Abrir con > navegador”).
-2. Inicia sesión con un usuario válido.
+2. Inicia sesión con las credenciales de tu propia base de datos.
 3. Una vez logueado, accederás automáticamente a la pagina principal de RecoAnimesFLV (`app.html`).
 
 ---
@@ -57,8 +57,8 @@ Sistema de recomendación de animes basado en valoraciones de los usuarios, desa
 1. Inicia sesión con tu usuario.
 2. Entrena el modelo de recomendaciones, en el pie de la pagina.
 3. Verifica el estado del sistema, en el pie de la pagina
-4. Escribe tu ID en el panel principal de recomendaciones.
-5. En la sección de resultados, se mostrarán los animes más afines según tus puntuaciones previas siempre y cuando hagas puntuado mas de 5 animes.
+4. Escribe un ID en el panel principal de recomendaciones.
+5. En la sección de resultados, se mostrarán los animes mas recomendados segun las valoraciones previas siempre y cuando hagas puntuado mas de 5 animes.
 
 ---
 
